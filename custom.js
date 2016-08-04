@@ -25,6 +25,12 @@ function today(td) {
     return td.getDate() == d.getDate() && td.getMonth() == d.getMonth() && td.getFullYear() == d.getFullYear();
 }
 
+function dayInWeek() {
+    var d = new Date();
+
+    return d.getUTCDay();
+}
+
 function avion(callback) {
     download("http://avion58.cz/", function(data) {
         if (data) {
@@ -34,7 +40,7 @@ function avion(callback) {
             parsedHTML('strong.price').map(function(i, food) {
                 var name = $(this).prev().text();
 
-                if (name) {                    
+                if (name) {
                     res.push({
                         "name": name,
                         "price": $(this).text()
@@ -81,7 +87,7 @@ function puzzle(callback) {
             parsedHTML('span.price').map(function(i, food) {
                 var name = $(this).prev().text();
 
-                if (name) {                    
+                if (name) {
                     res.push({
                         "name": name,
                         "price": $(this).text()
@@ -114,7 +120,7 @@ function eurest(callback) {
 
                 var isToday = today(d);
 
-                if (isToday) {                    
+                if (isToday) {
                     res.push({
                         "name": j.Items[i].MealName
                     });
@@ -128,13 +134,67 @@ function eurest(callback) {
     });
 }
 
+function komin(callback) {
+
+    var day = dayInWeek() + 1;
+    download("http://www.pivovarkomin.sk/nasa-ponuka", function(data) {
+        if (data) {
+            // console.log(data);
+            var res = [];
+
+            var parsedHTML = $.load(data);
+            // table:nth-of-type('+day+') tr
+            parsedHTML('.jwts_tabbertab').map(function(i, div) {
+
+
+                if (i == 1) {
+                  var name = $(this).prev().text();
+                   console.log(name);
+                   if (name) {
+                        res.push({
+                            "name": name,
+                            "price": $(this).text()
+                        });
+                    }
+                }
+
+                // console.log(div);
+
+
+            //     if (name) {
+            //         res.push({
+            //             "name": name,
+            //             "price": $(this).text()
+            //         });
+            //     }
+            });
+
+            // callback(res);
+        } else {
+            callback([]);
+        }
+    });
+
+}
+
 module.exports = {
     handles: function(restaurant) {
-        return restaurant == "avion" || restaurant == "motoburger" || restaurant == "puzzle" || restaurant == "eurest";
+
+        if (restaurant == "komin") {
+            return true;
+        }
+
+        return false;
+
+        // restaurant === "avion" ||
+        // restaurant === "motoburger" ||
+        // restaurant === "puzzle" ||
+        // restaurant === "eurest" ||
+        //restaurant == "komin";
     },
 
     restaurants: function() {
-        return ["avion", "motoburger", "puzzle", "eurest"]
+        return ["avion", "motoburger", "puzzle", "eurest", "komin"]
     },
 
     get: function(restaurant, callback) {
@@ -151,6 +211,9 @@ module.exports = {
             case "motoburger":
                 motoburger(callback);
                 break;
+            case "komin":
+                komin(callback);
+                break;
         }
     },
 
@@ -164,6 +227,8 @@ module.exports = {
                 return "PUZZLE SALADS";
             case "motoburger":
                 return "MOTOBURGER";
+            case "komin":
+                return "Pivovar komin";
         }
     }
 };
