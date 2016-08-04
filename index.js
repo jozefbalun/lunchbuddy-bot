@@ -74,11 +74,7 @@ function process(msg, id) {
             break;
 
         default:
-        // console.log(providers);
           providers.forEach(function(provider) {
-
-            console.log(provider.handles(msg));
-
             if (provider.handles(msg)) {
               provider.get(msg, function(data) {
                 sendResponse(id, data, provider.name(msg));
